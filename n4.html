@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Happy New Year ✨</title>
+
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;}
+body{
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  overflow:hidden;
+  color:white;
+  background: linear-gradient(135deg,#1a2a6c,#b21f1f,#fdbb2d);
+  animation:bgAnimate 15s ease infinite alternate;
+}
+@keyframes bgAnimate{
+  0%{background:#1a2a6c;}
+  50%{background:#0f2027;}
+  100%{background:#2575fc;}
+}
+
+.card{
+  width:92%;
+  max-width:440px;
+  background:rgba(255,255,255,0.15);
+  backdrop-filter:blur(15px);
+  border-radius:25px;
+  padding:22px;
+  text-align:center;
+  box-shadow:0 0 40px rgba(0,0,0,0.4);
+  z-index:2;
+}
+
+.hidden{display:none;}
+.auto-type{color:#ffd369;font-weight:bold;}
+button{
+  background:white;
+  color:#b21f1f;
+  border:none;
+  padding:9px 16px;
+  border-radius:25px;
+  font-size:13px;
+  cursor:pointer;
+  margin:5px;
+}
+
+.section-title{
+  margin:18px 0 10px;
+  color:#ffd369;
+  font-size:18px;
+}
+
+.gameBox{
+  background:rgba(0,0,0,0.25);
+  border-radius:18px;
+  padding:14px;
+  margin-top:12px;
+}
+.drawCanvas{
+  background:white;
+  border-radius:12px;
+  display:block;
+  margin:10px auto;
+  max-width:100%;
+}
+.slider-img{
+  width:220px;
+  height:140px;
+  border-radius:12px;
+  object-fit:cover;
+  margin:10px auto;
+  display:block;
+}
+#gameMessage{
+  position:absolute;
+  top:40%;
+  width:100%;
+  text-align:center;
+  font-size:22px;
+  color:#ffd369;
+  font-weight:bold;
+}
+.game-heart{
+  position:absolute;
+  font-size:28px;
+  cursor:pointer;
+}
+</style>
+</head>
+<body>
+
+<div id="gameMessage">Catch 5 hearts ❤️ to start!</div>
+
+<div class="card hidden" id="mainCard">
+  <h1>Happy New Year ✨</h1>
+
+  <p>Hey <span class="auto-type"></span> 🙂</p>
+  <p id="msg1" class="hidden"></p>
+  <p id="msg2" class="hidden"></p>
+
+  <!-- MUSIC PLAYER -->
+  <div class="gameBox">
+    <h3>🎵 Music</h3>
+    <button onclick="prevSong()">⏮</button>
+    <button onclick="toggleMusic()">▶ / ⏸</button>
+    <button onclick="nextSong()">⏭</button>
+  </div>
+
+  <div class="section-title">
+    Do you want to play some fun mini games?
+  </div>
+
+  <!-- DRAWING GAME -->
+  <div class="gameBox">
+    <h3>🎨 Draw Something for Me</h3>
+    <canvas id="drawGame" width="240" height="150" class="drawCanvas"></canvas>
+    <button onclick="clearDraw()">Clear</button>
+    <button onclick="saveDraw()">Save 💾</button>
+  </div>
+
+  <!-- MINI GAME 1: PHOTO SLIDER -->
+  <div class="gameBox">
+    <h3>📸 Photo Slider</h3>
+    <img id="slider" class="slider-img" src="img1.jpg" alt="slider">
+    <br>
+    <button onclick="prevPhoto()">⏮</button>
+    <button onclick="nextPhoto()">⏭</button>
+  </div>
+
+  <!-- MINI GAME 2: LOVE METER -->
+  <div class="gameBox">
+    <h3>💖 Love Meter</h3>
+    <button onclick="loveMeter()">Tap 💗</button>
+    <p id="loveValue">0%</p>
+  </div>
+
+</div>
+
+<audio id="bgMusic" loop></audio>
+
+<script>
+// ---------- HEART CATCH GAME ----------
+let hearts=0;
+function spawnHeart(){
+ if(hearts>=5) return;
+ const h=document.createElement("div");
+ h.className="game-heart";
+ h.innerHTML="❤️";
+ h.style.left=Math.random()*(innerWidth-30)+"px";
+ h.style.top="-40px";
+ document.body.appendChild(h);
+ let y=-40;
+ const fall=setInterval(()=>{
+  y+=3;
+  h.style.top=y+"px";
+  if(y>innerHeight){h.remove();clearInterval(fall);}
+ },20);
+ h.onclick=()=>{
+  hearts++;
+  h.remove();
+  clearInterval(fall);
+  if(hearts>=5) startMain();
+ };
+}
+setInterval(spawnHeart,700);
+
+function startMain(){
+ document.getElementById("gameMessage").style.display="none";
+ document.getElementById("mainCard").classList.remove("hidden");
+ typeName(); // <- yahi call correct place hai
+}
+
+// ---------- CRUSH TEXT ----------
+const name="Ashi vishwakarma❤️😏";
+let i=0;
+const messages=[
+ "Tu humesha mere shaath rhena chasmis 💙",
+ "I love you ❤️",
+ "Happy New Year, my special one ✨"
+];
+function typeName(){
+ if(i<name.length){
+  document.querySelector(".auto-type").textContent+=name[i++];
+  setTimeout(typeName,180);
+ } else typeMessages(0);
+}
+function typeMessages(n){
+ if(n>=messages.length) return;
+ let x=0;
+ const box=n<2?msg1:msg2;
+ box.classList.remove("hidden");
+ const t=setInterval(()=>{
+  if(x<messages[n].length){
+   box.textContent+=messages[n][x++];
+  } else{
+   clearInterval(t);
+   setTimeout(()=>typeMessages(n+1),600);
+  }
+ },50);
+}
+typeName();
+
+// ---------- MUSIC ----------
+const songs=["a.mpeg","a2.mpeg","a3.mpeg" ,"a4.mpeg" ,"a5.mpeg" ,"a6.mpeg" ,"a7.mpeg" ,"a8.mpeg"];
+let idx=0;
+const music=document.getElementById("bgMusic");
+music.src=songs[idx];
+function toggleMusic(){music.paused?music.play():music.pause();}
+function nextSong(){idx=(idx+1)%songs.length;music.src=songs[idx];music.play();}
+function prevSong(){idx=(idx-1+songs.length)%songs.length;music.src=songs[idx];music.play();}
+
+// ---------- DRAWING ----------
+const c=document.getElementById("drawGame");
+const ctx=c.getContext("2d");
+let draw=false;
+c.onmousedown=()=>draw=true;
+c.onmouseup=()=>draw=false;
+c.onmousemove=e=>{
+ if(!draw) return;
+ const r=c.getBoundingClientRect();
+ ctx.fillStyle="red";
+ ctx.beginPath();
+ ctx.arc(e.clientX-r.left,e.clientY-r.top,3,0,Math.PI*2);
+ ctx.fill();
+};
+function clearDraw(){ctx.clearRect(0,0,c.width,c.height);}
+function saveDraw(){
+ const link=document.createElement("a");
+ link.download="my_drawing.png";
+ link.href=c.toDataURL();
+ link.click();
+}
+
+// ---------- PHOTO SLIDER ----------
+const photos = [ "p.jpeg","p.jpeg","p2.jpeg","p3.jpeg" ,"p4.jpeg" ,"p5.jpeg" ,"p6.jpeg" ,"p7.jpeg" ,"p8.jpeg"]; // add your photos
+let current=0;
+const slider=document.getElementById("slider");
+function nextPhoto(){
+ current=(current+1)%photos.length;
+ slider.src=photos[current];
+}
+function prevPhoto(){
+ current=(current-1+photos.length)%photos.length;
+ slider.src=photos[current];
+}
+
+// ---------- LOVE METER ----------
+function loveMeter(){
+ const val=Math.floor(Math.random()*40)+60;
+ document.getElementById("loveValue").innerText=val+"% 💕";
+}
+</script>
+
+</body>
+</html>
