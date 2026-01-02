@@ -66,12 +66,14 @@ button{
   margin-top:14px;
 }
 
+/* 🔥 MOBILE DRAW FIX */
 .drawCanvas{
   background:white;
   border-radius:12px;
   display:block;
   width:100%;
   height:180px;
+  touch-action:none;   /* ⭐ MOST IMPORTANT LINE */
 }
 
 .slider-img{
@@ -100,7 +102,6 @@ button{
   cursor:pointer;
 }
 
-/* 🔥 CRUSH GALLERY */
 .photo-gallery{
   display:grid;
   grid-template-columns:repeat(2,1fr);
@@ -144,6 +145,14 @@ button{
   <div class="gameBox">
     <h3>🎨 Draw Something</h3>
     <canvas id="drawGame" class="drawCanvas"></canvas>
+
+    <!-- BRUSH CONTROLS -->
+    <div style="margin-top:8px;">
+      <input type="color" onchange="brushColor=this.value">
+      <input type="range" min="2" max="10" value="4"
+             onchange="brushSize=this.value">
+    </div>
+
     <button onclick="clearDraw()">Clear</button>
     <button onclick="saveDraw()">Save 💾</button>
   </div>
@@ -156,14 +165,7 @@ button{
     <button onclick="nextPhoto()">⏭</button>
   </div>
 
-  <!-- LOVE
-  <div class="gameBox">
-    <h3>💖 Love Meter</h3>
-    <button onclick="loveMeter()">Tap 💗</button>
-    <p id="loveValue">0%</p>
-  </div> -->
-
-  <!-- ❤️ CRUSH PHOTOS END -->
+  <!-- GALLERY -->
   <div class="gameBox">
     <h3>📷 Our Memories ❤️</h3>
     <div class="photo-gallery">
@@ -252,31 +254,43 @@ function toggleMusic(){music.paused?music.play():music.pause();}
 function nextSong(){idx=(idx+1)%songs.length;music.src=songs[idx];music.play();}
 function prevSong(){idx=(idx-1+songs.length)%songs.length;music.src=songs[idx];music.play();}
 
-// DRAW
+// 🎨 DRAW (FINAL MOBILE SAFE)
 const c=document.getElementById("drawGame");
 const ctx=c.getContext("2d");
 
 function resizeCanvas(){
-  c.width=c.offsetWidth;
-  c.height=c.offsetHeight;
+ c.width=c.offsetWidth;
+ c.height=c.offsetHeight;
 }
 resizeCanvas();
-window.addEventListener("resize", resizeCanvas);
+window.addEventListener("resize",resizeCanvas);
 
 let drawing=false;
+let brushSize=4;
+let brushColor="red";
+
+function getPos(e){
+ const r=c.getBoundingClientRect();
+ if(e.touches){
+  return{
+   x:e.touches[0].clientX-r.left,
+   y:e.touches[0].clientY-r.top
+  };
+ }
+ return{
+  x:e.clientX-r.left,
+  y:e.clientY-r.top
+ };
+}
 
 function draw(e){
-  if(!drawing) return;
-  e.preventDefault(); // 🔥 important for mobile
-
-  const r=c.getBoundingClientRect();
-  const x=(e.touches ? e.touches[0].clientX : e.clientX) - r.left;
-  const y=(e.touches ? e.touches[0].clientY : e.clientY) - r.top;
-
-  ctx.fillStyle="red";
-  ctx.beginPath();
-  ctx.arc(x,y,3,0,Math.PI*2);
-  ctx.fill();
+ if(!drawing) return;
+ e.preventDefault();
+ const p=getPos(e);
+ ctx.fillStyle=brushColor;
+ ctx.beginPath();
+ ctx.arc(p.x,p.y,brushSize,0,Math.PI*2);
+ ctx.fill();
 }
 
 // mouse
@@ -284,33 +298,30 @@ c.addEventListener("mousedown",()=>drawing=true);
 c.addEventListener("mouseup",()=>drawing=false);
 c.addEventListener("mousemove",draw);
 
-// touch (mobile)
-c.addEventListener("touchstart",(e)=>{drawing=true;e.preventDefault();},{passive:false});
+// touch
+c.addEventListener("touchstart",(e)=>{
+ drawing=true;
+ draw(e);
+},{passive:false});
 c.addEventListener("touchend",()=>drawing=false);
 c.addEventListener("touchmove",draw,{passive:false});
 
 function clearDraw(){
-  ctx.clearRect(0,0,c.width,c.height);
+ ctx.clearRect(0,0,c.width,c.height);
 }
 
 function saveDraw(){
-  const a=document.createElement("a");
-  a.download="drawing.png";
-  a.href=c.toDataURL();
-  a.click();
+ const a=document.createElement("a");
+ a.download="drawing.png";
+ a.href=c.toDataURL();
+ a.click();
 }
 
 // SLIDER
-const photos=["p.jpeg","p2.jpeg","p3.jpeg" ,"p4.jpeg" ,"p5.jpeg" ,"p6.jpeg" ,"p7.jpeg" ,"p8.jpeg"];
+const photos=["p.jpeg","p2.jpeg","p3.jpeg","p4.jpeg","p5.jpeg","p6.jpeg","p7.jpeg","p8.jpeg"];
 let current=0;
 function nextPhoto(){current=(current+1)%photos.length;slider.src=photos[current];}
 function prevPhoto(){current=(current-1+photos.length)%photos.length;slider.src=photos[current];}
-
-// LOVE
-// function loveMeter(){
-//  document.getElementById("loveValue").innerText=
-//  Math.floor(Math.random()*40+60)+"% 💕";
-// }
 </script>
 
 </body>
